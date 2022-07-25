@@ -1,6 +1,8 @@
 use bitvec::prelude::*;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
+use std::fs::File;
+use std::io::Write;
 use std::time::{Duration, Instant};
 
 const WORD_COUNT: usize = 5977;
@@ -35,6 +37,7 @@ struct SearchContext {
     letters: Vec<Letter>,
     seen: SeenSet,
     current: WordBitArr,
+    result: File,
 }
 
 fn main() {
@@ -44,6 +47,7 @@ fn main() {
         words,
         current: WordBitArr::ZERO,
         seen: SeenSet::new(),
+        result: File::create("result.txt").unwrap(),
     };
 
     let start = Instant::now();
@@ -61,8 +65,10 @@ fn search(context: &mut SearchContext, blocklist: &WordBitArr, depth: usize) -> 
     if depth == SEARCH_MAX_DEPTH {
         for word in context.current.iter_ones().map(|i| &context.words[i]) {
             print!("{} ", word.value);
+            write!(context.result, "{} ", word.value).unwrap();
         }
         println!();
+        writeln!(context.result).unwrap();
         return 1;
     }
 
